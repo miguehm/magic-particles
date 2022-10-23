@@ -12,7 +12,7 @@ for (let i = 0; i < buffer.length; i++){
 }
 
 const primaryGainControl = audioContext.createGain()
-primaryGainControl.gain.setValueAtTime(0.20, 0)
+primaryGainControl.gain.setValueAtTime(0.06, 0)
 primaryGainControl.connect(audioContext.destination)
 
 const button = document.createElement('button')
@@ -42,15 +42,43 @@ snareButton.addEventListener('click', () => {
 
 document.body.appendChild(snareButton)
 
+// piano
 const kickButton = document.createElement('button')
 kickButton.innerText = 'Kick'
 kickButton.addEventListener('click', () => {
 	const kickOscillator = audioContext.createOscillator()
 
 	kickOscillator.frequency.setValueAtTime(523.2, 0)
+	kickOscillator.type = 'square'
 	kickOscillator.connect(primaryGainControl)
 	kickOscillator.start()
 	kickOscillator.stop(audioContext.currentTime + 0.5)
 })
-
 document.body.appendChild(kickButton)
+
+// tambor
+// const kickButton = document.createElement('button')
+// kickButton.innerText = 'tambor'
+// kickButton.addEventListener('click', () => {
+// 	const kickOscillator = audioContext.createOscillator()
+// 
+// 	kickOscillator.frequency.setValueAtTime(500, 0)
+// 	kickOscillator.frequency.exponentialRampToValueAtTime(
+// 		0.001,
+// 		audioContext.currentTime + 0.5
+// 	)
+// 
+// 	const kickGain = audioContext.createGain()
+// 	kickGain.gain.setValueAtTime(1, 0)
+// 	kickGain.gain.exponentialRampToValueAtTime(
+// 		0.001,
+// 		audioContext.currentTime + 0.5
+// 	)
+// 
+// 	kickOscillator.connect(kickGain)
+// 	kickGain.connect(primaryGainControl)
+// 	kickOscillator.start()
+// 	kickOscillator.stop(audioContext.currentTime + 0.5)
+// })
+// 
+// document.body.appendChild(kickButton)
