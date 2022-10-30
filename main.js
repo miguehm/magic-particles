@@ -1,6 +1,140 @@
 //import './style.css'
 
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+
+const res = await fetch('mariposa.json');
+const data = await res.json();
+console.log(data['shapes']);
+
+let scene = new THREE.Scene();
+let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 0, 500);
+
+let renderer = new THREE.WebGLRenderer({
+	canvas: document.querySelector('#bg'),
+	antialias: true,
+	logarithmicDepthBuffer: true
+});
+
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+let controls = new OrbitControls(camera, renderer.domElement);
+
+let objectsC = [];
+
+function createBg(data){
+	const bgWidth = data['shapes'][0]['data'][2];
+	const bgHeight = data['shapes'][0]['data'][3];
+	const bgColor = 'rgb('
+		+data['shapes'][0]['color'][0]+', '
+		+data['shapes'][0]['color'][1]+', '
+		+data['shapes'][0]['color'][2]
+		+')';
+
+	const bg = new THREE.Mesh(
+		new THREE.PlaneGeometry(
+			bgWidth,
+			bgHeight
+		),
+		new THREE.MeshBasicMaterial({
+			color: new THREE.Color(bgColor),
+		})
+	);
+	scene.add(bg);
+}
+
+// const bgInfo = data['shapes'][0];
+// const bgWidth = bgInfo['data'][2];
+// const bgHeight = bgInfo['data'][3];
+// const bgColor = 'rgb('
+// 	+bgInfo['color'][0]+', '
+// 	+bgInfo['color'][1]+', '
+// 	+bgInfo['color'][2]
+// 	+')';
+// 
+// const bg = new THREE.Mesh(
+// 	new THREE.PlaneGeometry(
+// 		bgWidth,
+// 		bgHeight
+// 	),
+// 	new THREE.MeshBasicMaterial({
+// 		color: new THREE.Color(bgColor),
+// 	})
+// )
+// 
+// scene.add(bg);
+
+//createBgFigure(bgFigure1);
+
+let fixZF = 0.05;
+function createCircle(data, step){
+	const colorC = 'rgb('
+		+data['shapes'][step]['color'][0]+', '
+		+data['shapes'][step]['color'][1]+', '
+		+data['shapes'][step]['color'][2]
+		+')';
+
+	const bgWidth = data['shapes'][0]['data'][2];
+	const bgHeight = data['shapes'][0]['data'][3];
+
+	const pos = {
+		x: data['shapes'][step]['data'][0]-bgWidth/2,
+		y: -data['shapes'][step]['data'][1]+bgHeight/2
+	};
+
+	const r = data['shapes'][step]['data'][2];
+
+	const circle = new THREE.Mesh(
+		new THREE.CircleGeometry(r, 18),
+		new THREE.MeshBasicMaterial({
+			color: new THREE.Color(colorC),
+			transparent: true,
+			opacity: 0.5
+		})
+	);
+	circle.position.set(pos.x, pos.y, fixZF);
+	fixZF += 0.04;
+
+	scene.add(circle);
+	objectsC.push(circle);
+}
+
+// for (let i = 1; i<data['shapes'].length; i++){
+// 	createCircle(data['shapes'][i]);
+// }
+//createCircle(data['shapes'][1])
+//console.log(objectsC);
+
+// const pointLight = new THREE.PointLight( 0xffffff, 1, 100 );
+// pointLight.position.set( -100, 0, 10 );
+// scene.add( pointLight );
+
+createBg(data);
+
+controls.update();
+
+document.addEventListener('keydown', () => {
+	pointLight.position.x += 10;
+});
+
+let step = 1;
+function animate(){
+	requestAnimationFrame(animate);
+	controls.update();
+
+	if (step < data['shapes'].length){
+		createCircle(data, step);
+		step+=1;
+	}
+
+	camera.updateProjectionMatrix();
+	
+	renderer.render(scene, camera);
+}
+
+animate();
 
 // Creamos el audio context
 // será el destino del audio
@@ -42,13 +176,7 @@ button.addEventListener('click', () => {
 	whiteNoiseSource.start()
 })
 
-document.body.appendChild(button)
-// nodo de conexión
-// .  whiteNoiseSource
-// -> primaryGainControl
-// -> audioContext.destination
-
-// 
+// document.body.appendChild(button)
 
 const snareFilter = audioContext.createBiquadFilter()
 snareFilter.type = "highpass"
@@ -64,7 +192,7 @@ snareButton.addEventListener('click', () => {
 	whiteNoiseSource.start()
 })
 
-document.body.appendChild(snareButton)
+// document.body.appendChild(snareButton)
 
 // piano
 
@@ -86,8 +214,7 @@ kickButton.addEventListener('click', () => {
 	// detiene el oscilador despues de 0.5 segundos
 	kickOscillator.stop(audioContext.currentTime + 0.5)
 })
-
-document.body.appendChild(kickButton)
+// document.body.appendChild(kickButton)
 
 // nodos
 // .  kickOscillator
