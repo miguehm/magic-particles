@@ -11,7 +11,7 @@ const rubikData = await rubikRes.json();
 
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 500);
+camera.position.set(0, 0, 270);
 
 let renderer = new THREE.WebGLRenderer({
 	canvas: document.querySelector('#bg'),
@@ -78,11 +78,10 @@ function createCircle(data, step, zFight){
 }
 
 class Figure {
-	constructor (data, scene) {
+	constructor (data) {
 		this.data = data;
 		this.objects = [];
 		this.zFight = 0.05;
-		this.scene = scene;
 		this.step = 1;
 	}
 
@@ -107,9 +106,9 @@ class Figure {
 	}
 }
 
-let mariposa = new Figure(mariposaData, scene);
+let mariposa = new Figure(mariposaData);
 //mariposa.createBg();
-let rubik = new Figure(rubikData, scene);
+let rubik = new Figure(rubikData);
 rubik.createBg();
 
 // function createBg(data){
