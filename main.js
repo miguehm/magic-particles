@@ -46,7 +46,7 @@ function createBg(data){
 	return bg;
 }
 
-function createCircle(data, step, zFight){
+function createCircle(data, step, zFight, x, y, z, rx, ry, rz){
 	const colorC = 'rgb('
 		+data['shapes'][step]['color'][0]+', '
 		+data['shapes'][step]['color'][1]+', '
@@ -57,8 +57,9 @@ function createCircle(data, step, zFight){
 	const bgHeight = data['shapes'][0]['data'][3];
 
 	const pos = {
-		x: data['shapes'][step]['data'][0]-bgWidth/2,
-		y: -data['shapes'][step]['data'][1]+bgHeight/2
+		x: data['shapes'][step]['data'][0]-bgWidth/2 + x,
+		y: -data['shapes'][step]['data'][1]+bgHeight/2 + y,
+		z: zFight + z
 	};
 
 	const r = data['shapes'][step]['data'][2];
@@ -68,10 +69,18 @@ function createCircle(data, step, zFight){
 		new THREE.MeshBasicMaterial({
 			color: new THREE.Color(colorC),
 			transparent: true,
-			opacity: 0.5
+			opacity: 0.5,
+			//side: THREE.DoubleSide
 		})
 	);
-	circle.position.set(pos.x, pos.y, zFight);
+
+	ry = (ry*Math.PI)/180;
+	circle.rotation.y = ry;
+	
+	// rotationY
+	circle.position.x = pos.x*Math.cos(ry) + pos.z*Math.sin(ry);
+	circle.position.y = pos.y;
+	circle.position.z = -pos.x*Math.sin(ry)+pos.z*Math.cos(ry);
 
 	scene.add(circle);
 	return circle;
@@ -83,6 +92,9 @@ class Figure {
 		this.objects = [];
 		this.zFight = 0.05;
 		this.step = 1;
+		this.rx = 0;
+		this.ry = 0;
+		this.rz = 0;
 	}
 
 	createBg(){
@@ -90,11 +102,30 @@ class Figure {
 		this.objects.push(bg);
 	}
 
-	createCircle(){
-		const circle = createCircle(this.data, this.step, this.zFight);
+	createCircle(x, y, z){
+
+		const posX = (x!=null)?x:0;
+		const posY = (y!=null)?y:0;
+		const posZ = (z!=null)?z:0;
+
+		const circle = createCircle(
+			this.data,
+			this.step, 
+			this.zFight,
+			posX,
+			posY,
+			posZ,
+			this.rx,
+			this.ry,
+			this.rz
+		);
 		this.objects.push(circle);
 		this.step += 1;
 		this.zFight += 0.05;
+	}
+
+	set rotationY(ry){
+		this.ry = ry;
 	}
 
 	objects(){
@@ -109,7 +140,10 @@ class Figure {
 let mariposa = new Figure(mariposaData);
 //mariposa.createBg();
 let rubik = new Figure(rubikData);
-rubik.createBg();
+//rubik.createBg();
+
+const axesHelper = new THREE.AxesHelper(300);
+scene.add(axesHelper);
 
 // function createBg(data){
 // 	const bgWidth = data['shapes'][0]['data'][2];
@@ -142,22 +176,30 @@ controls.update();
 document.addEventListener('keydown', () => {
 // 	pointLight.position.x += 10;
 	for (let i = 0; i < rubik.objects.length; i++){
-		scene.remove(rubik.objects[i]);
+		//scene.remove(rubik.objects[i]);
 	}
 	console.log('removed')
 });
 
-let step = 1;
+let stepR = 1;
+let stepM = 1;
 
-	console.log(rubikData['shapes'].length);
+	//console.log(rubikData['shapes'].length);
+
+rubik.rotationY = 45;
 function animate(){
 	requestAnimationFrame(animate);
 	controls.update();
 
-	if (step < rubikData['shapes'].length){
-		//mariposa.createCircle();
+	if (stepR < rubikData['shapes'].length){
+		//rubik.createCircle();
 		rubik.createCircle();
-		step+=1;
+		stepR+=1;
+	}
+
+	if (stepM < mariposaData['shapes'].length){
+		//mariposa.createCircle();
+		stepM += 1;
 	}
 
 	camera.updateProjectionMatrix();
