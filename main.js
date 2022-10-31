@@ -1,11 +1,13 @@
-//import './style.css'
+import './style.css'
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
-const res = await fetch('mariposa.json');
-const data = await res.json();
-console.log(data['shapes']);
+const mariposaRes = await fetch('mariposa.json');
+const mariposaData = await mariposaRes.json();
+
+const rubikRes = await fetch('rubik.json');
+const rubikData = await rubikRes.json();
 
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -22,15 +24,13 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 let controls = new OrbitControls(camera, renderer.domElement);
 
-let objectsC = [];
-
 function createBg(data){
 	const bgWidth = data['shapes'][0]['data'][2];
 	const bgHeight = data['shapes'][0]['data'][3];
 	const bgColor = 'rgb('
-		+data['shapes'][0]['color'][0]+', '
-		+data['shapes'][0]['color'][1]+', '
-		+data['shapes'][0]['color'][2]
+		+ data['shapes'][0]['color'][0]+', '
+		+ data['shapes'][0]['color'][1]+', '
+		+ data['shapes'][0]['color'][2]
 		+')';
 
 	const bg = new THREE.Mesh(
@@ -43,33 +43,10 @@ function createBg(data){
 		})
 	);
 	scene.add(bg);
+	return bg;
 }
 
-// const bgInfo = data['shapes'][0];
-// const bgWidth = bgInfo['data'][2];
-// const bgHeight = bgInfo['data'][3];
-// const bgColor = 'rgb('
-// 	+bgInfo['color'][0]+', '
-// 	+bgInfo['color'][1]+', '
-// 	+bgInfo['color'][2]
-// 	+')';
-// 
-// const bg = new THREE.Mesh(
-// 	new THREE.PlaneGeometry(
-// 		bgWidth,
-// 		bgHeight
-// 	),
-// 	new THREE.MeshBasicMaterial({
-// 		color: new THREE.Color(bgColor),
-// 	})
-// )
-// 
-// scene.add(bg);
-
-//createBgFigure(bgFigure1);
-
-let fixZF = 0.05;
-function createCircle(data, step){
+function createCircle(data, step, zFight){
 	const colorC = 'rgb('
 		+data['shapes'][step]['color'][0]+', '
 		+data['shapes'][step]['color'][1]+', '
@@ -94,38 +71,93 @@ function createCircle(data, step){
 			opacity: 0.5
 		})
 	);
-	circle.position.set(pos.x, pos.y, fixZF);
-	fixZF += 0.04;
+	circle.position.set(pos.x, pos.y, zFight);
 
 	scene.add(circle);
-	objectsC.push(circle);
+	return circle;
 }
 
-// for (let i = 1; i<data['shapes'].length; i++){
-// 	createCircle(data['shapes'][i]);
+class Figure {
+	constructor (data, scene) {
+		this.data = data;
+		this.objects = [];
+		this.zFight = 0.05;
+		this.scene = scene;
+		this.step = 1;
+	}
+
+	createBg(){
+		const bg = createBg(this.data);
+		this.objects.push(bg);
+	}
+
+	createCircle(){
+		const circle = createCircle(this.data, this.step, this.zFight);
+		this.objects.push(circle);
+		this.step += 1;
+		this.zFight += 0.05;
+	}
+
+	objects(){
+		return this.objects;
+	}
+
+	data(){
+		return this.data;
+	}
+}
+
+let mariposa = new Figure(mariposaData, scene);
+//mariposa.createBg();
+let rubik = new Figure(rubikData, scene);
+rubik.createBg();
+
+// function createBg(data){
+// 	const bgWidth = data['shapes'][0]['data'][2];
+// 	const bgHeight = data['shapes'][0]['data'][3];
+// 	const bgColor = 'rgb('
+// 		+data['shapes'][0]['color'][0]+', '
+// 		+data['shapes'][0]['color'][1]+', '
+// 		+data['shapes'][0]['color'][2]
+// 		+')';
+// 
+// 	const bg = new THREE.Mesh(
+// 		new THREE.PlaneGeometry(
+// 			bgWidth,
+// 			bgHeight
+// 		),
+// 		new THREE.MeshBasicMaterial({
+// 			color: new THREE.Color(bgColor),
+// 		})
+// 	);
+// 	scene.add(bg);
 // }
-//createCircle(data['shapes'][1])
-//console.log(objectsC);
+
 
 // const pointLight = new THREE.PointLight( 0xffffff, 1, 100 );
 // pointLight.position.set( -100, 0, 10 );
 // scene.add( pointLight );
 
-createBg(data);
-
 controls.update();
 
 document.addEventListener('keydown', () => {
-	pointLight.position.x += 10;
+// 	pointLight.position.x += 10;
+	for (let i = 0; i < rubik.objects.length; i++){
+		scene.remove(rubik.objects[i]);
+	}
+	console.log('removed')
 });
 
 let step = 1;
+
+	console.log(rubikData['shapes'].length);
 function animate(){
 	requestAnimationFrame(animate);
 	controls.update();
 
-	if (step < data['shapes'].length){
-		createCircle(data, step);
+	if (step < rubikData['shapes'].length){
+		//mariposa.createCircle();
+		rubik.createCircle();
 		step+=1;
 	}
 
@@ -135,6 +167,8 @@ function animate(){
 }
 
 animate();
+
+// ================ AUDIO ===============
 
 // Creamos el audio context
 // será el destino del audio
