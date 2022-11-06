@@ -186,7 +186,7 @@ let stepM = 1;
 
 	//console.log(rubikData['shapes'].length);
 
-rubik.rotationY = 45;
+rubik.rotationY = 180;
 function animate(){
 	requestAnimationFrame(animate);
 	controls.update();
@@ -198,7 +198,7 @@ function animate(){
 	}
 
 	if (stepM < mariposaData['shapes'].length){
-		//mariposa.createCircle();
+		mariposa.createCircle();
 		stepM += 1;
 	}
 
