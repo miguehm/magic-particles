@@ -24,6 +24,22 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 let controls = new OrbitControls(camera, renderer.domElement);
 
+// audio analyser
+var audio = new Audio("audio.mp3");
+window.onload = (event) => {
+	audio.play();
+};
+
+var context = new AudioContext();
+var src = context.createMediaElementSource(audio);
+var analyser = context.createAnalyser();
+src.connect(analyser);
+analyser.connect(context.destination);
+analyser.fftSize = 32;
+var bufferLength = analyser.frequencyBinCount;
+var dataArray = new Uint8Array(bufferLength);
+console.log(dataArray);
+
 function createBg(data){
 	const bgWidth = data['shapes'][0]['data'][2];
 	const bgHeight = data['shapes'][0]['data'][3];
@@ -183,15 +199,19 @@ document.addEventListener('keydown', () => {
 
 let stepR = 1;
 let stepM = 1;
-
-	//console.log(rubikData['shapes'].length);
+let musicInfo;
 
 rubik.rotationY = 180;
 function animate(){
+	analyser.getByteFrequencyData(dataArray);
+	console.log(dataArray);
+
 	requestAnimationFrame(animate);
 	controls.update();
 
-	if (stepR < rubikData['shapes'].length){
+	musicInfo = (dataArray[8]/255);
+
+	if (stepR < rubikData['shapes'].length && musicInfo > 0.5){
 		//rubik.createCircle();
 		rubik.createCircle();
 		stepR+=1;
@@ -209,8 +229,9 @@ function animate(){
 
 animate();
 
-// ================ AUDIO ===============
 
+// ================ AUDIO ===============
+/*
 // Creamos el audio context
 // será el destino del audio
 const audioContext = new AudioContext();
@@ -322,3 +343,4 @@ kickButton.addEventListener('click', () => {
 // })
 // 
 // document.body.appendChild(kickButton)
+*/
