@@ -6,7 +6,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, -270);
+camera.position.set(0, 0, -70);
 
 let renderer = new THREE.WebGLRenderer({
 	canvas: document.querySelector('#bg'),
@@ -91,10 +91,11 @@ function createCircle(data, step, zFight, x, y, z, rx, ry, rz){
 		})
 	);
 
+	// Rotar imagen acorde a un ángulo
 	ry = (ry*Math.PI)/180;
 	circle.rotation.y = ry;
 	
-	// rotationY
+	// Matriz de transformación - rotationY
 	circle.position.x = pos.x*Math.cos(ry) + pos.z*Math.sin(ry);
 	circle.position.y = pos.y;
 	circle.position.z = -pos.x*Math.sin(ry)+pos.z*Math.cos(ry);
@@ -136,8 +137,12 @@ class Figure {
 			this.ry,
 			this.rz
 		);
+
+		// Arreglo de todos los objs circle
 		this.objects.push(circle);
 		this.step += 1;
+
+		// Fix Z fighting
 		this.zFight += 0.05;
 	}
 
@@ -162,6 +167,7 @@ class Figure {
 let mariposa = new Figure(mariposaData);
 //mariposa.createBg();
 let rubik = new Figure(rubikData);
+rubik.rotationY = 180;
 //rubik.createBg();
 
 // const axesHelper = new THREE.AxesHelper(300);
@@ -206,8 +212,8 @@ controls.update();
 let stepR = 1;
 let stepM = 1;
 let musicInfo;
+let cameraPos = 10;
 
-rubik.rotationY = 180;
 function animate(){
 	analyser.getByteFrequencyData(dataArray);
 	//console.log(dataArray[3]/255);
@@ -225,6 +231,11 @@ function animate(){
 		}
 		stepR = 1;
 		rubik.restartFigure();
+	}
+
+	if (cameraPos <= 270){
+		camera.position.z = -cameraPos;
+		cameraPos += 0.5;
 	}
 
 	if (stepM < mariposaData['shapes'].length){
