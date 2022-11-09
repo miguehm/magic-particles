@@ -209,9 +209,7 @@ function animate(){
 	requestAnimationFrame(animate);
 	controls.update();
 
-	musicInfo = (dataArray[8]/255);
-
-	if (stepR < rubikData['shapes'].length && musicInfo > 0.5){
+	if (stepR < rubikData['shapes'].length && dataArray[8]/255 > 0.5){
 		//rubik.createCircle();
 		rubik.createCircle();
 		stepR+=1;
