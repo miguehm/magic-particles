@@ -3,15 +3,10 @@ import './style.css'
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
-const mariposaRes = await fetch('mariposa.json');
-const mariposaData = await mariposaRes.json();
-
-const rubikRes = await fetch('rubik.json');
-const rubikData = await rubikRes.json();
 
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 270);
+camera.position.set(0, 0, -270);
 
 let renderer = new THREE.WebGLRenderer({
 	canvas: document.querySelector('#bg'),
@@ -39,6 +34,12 @@ analyser.fftSize = 32;
 var bufferLength = analyser.frequencyBinCount;
 var dataArray = new Uint8Array(bufferLength);
 console.log(dataArray);
+
+const mariposaRes = await fetch('mariposa.json');
+const mariposaData = await mariposaRes.json();
+
+const rubikRes = await fetch('rubik.json');
+const rubikData = await rubikRes.json();
 
 function createBg(data){
 	const bgWidth = data['shapes'][0]['data'][2];
@@ -144,6 +145,11 @@ class Figure {
 		this.ry = ry;
 	}
 
+	restartFigure(){
+		this.step = 1;
+		this.zFight = 0.05;
+	}
+
 	objects(){
 		return this.objects;
 	}
@@ -189,13 +195,13 @@ scene.add(axesHelper);
 
 controls.update();
 
-document.addEventListener('keydown', () => {
-// 	pointLight.position.x += 10;
-	for (let i = 0; i < rubik.objects.length; i++){
-		//scene.remove(rubik.objects[i]);
-	}
-	console.log('removed')
-});
+// document.addEventListener('keydown', () => {
+// // 	pointLight.position.x += 10;
+// 	for (let i = 0; i < rubik.objects.length; i++){
+// 		//scene.remove(rubik.objects[i]);
+// 	}
+// 	console.log('removed')
+// });
 
 let stepR = 1;
 let stepM = 1;
@@ -204,15 +210,21 @@ let musicInfo;
 rubik.rotationY = 180;
 function animate(){
 	analyser.getByteFrequencyData(dataArray);
-	console.log(dataArray);
+	//console.log(dataArray[3]/255);
 
 	requestAnimationFrame(animate);
 	controls.update();
 
-	if (stepR < rubikData['shapes'].length && dataArray[8]/255 > 0.5){
+	if (stepR < rubikData['shapes'].length && dataArray[3]/255 >= 0.7){
 		//rubik.createCircle();
 		rubik.createCircle();
 		stepR+=1;
+	} else if (stepR >= rubikData['shapes'].length){
+		for (let i = 0; i < rubik.objects.length; i++){
+			scene.remove(rubik.objects[i]);
+		}
+		stepR = 1;
+		rubik.restartFigure();
 	}
 
 	if (stepM < mariposaData['shapes'].length){
