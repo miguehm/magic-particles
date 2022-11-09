@@ -164,8 +164,8 @@ let mariposa = new Figure(mariposaData);
 let rubik = new Figure(rubikData);
 //rubik.createBg();
 
-const axesHelper = new THREE.AxesHelper(300);
-scene.add(axesHelper);
+// const axesHelper = new THREE.AxesHelper(300);
+// scene.add(axesHelper);
 
 // function createBg(data){
 // 	const bgWidth = data['shapes'][0]['data'][2];
