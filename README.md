@@ -1,6 +1,6 @@
 # Magic Particles
 
-Image drawing with simple circular particles, appearing using music sound (battery kicks). First steps using `Web Audiocontext`.
+Image drawing with simple circular particles, appearing using sounds (battery kicks). First steps using `Web Audiocontext`.
 
 ![](https://user-images.githubusercontent.com/80235345/222921754-e0b14ebc-ef3f-46d6-8dd8-2cfdda8b0371.png)
 
